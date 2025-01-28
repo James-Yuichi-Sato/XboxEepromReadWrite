@@ -50,21 +50,36 @@ python -m pip install git+https://github.com/James-Yuichi-Sato/XboxEepromReadWri
 
 ### `arduino_prom` Functions
 
-`arduino_prom` usage is as follows
- (Determine your com port number by plugging in the Arduino to your PC after programming it)
+`arduino_prom` usage are as follows (Determine your com port number by plugging in the Arduino to your PC after programming it)
+
+You can also use `python -m arduino_prom -h` to get full argument information in console.
+
+#### Read EEPROM
+
+The following call reads the EEPROM on `COM1` and save to file to `./eeprom.bin`
 
 ```shell
-//Read the EEPROM on COM1 and save to file to eeprom.bin
-python -m arduino_prom COM1 READ eeprom.bin
-
-//Write eeprom.bin to the EEPROM on COM1.
-python -m arduino_prom COM1 WRITE eeprom.bin
-
-//Write all 0's to the EEPROM effectively erasing it.
-python -m arduino_prom COM1 ERASE
+python -m arduino_prom -C COM1 -r -o ./eeprom.bin
 ```
 
-Example outputs:
+#### Write EEPROM
+
+Write the file `./eeprom.bin` to the EEPROM on `COM1`.
+
+```shell
+python -m arduino_prom -C COM1 -w -f ./eeprom.bin
+```
+
+#### Erase EEPROM
+
+Erase (0 out) the EEPROM on COM1.
+
+```shell
+python -m arduino_prom -C COM1 -e
+```
+
+Example outputs (from Ryzee project):
+
   ![Write](https://i.imgur.com/mRRVvAb.png)
   ![Read](https://i.imgur.com/p308Va2.png)
   ![Erase](https://i.imgur.com/r6GWkpm.png)
