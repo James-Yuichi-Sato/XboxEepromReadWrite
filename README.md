@@ -10,6 +10,8 @@ See [PiPROM](https://github.com/grimdoomer/PiPROM) for the Original Raspberry Pi
 
 ## Setting up Arduino
 
+### Programming Arduino
+
 The firmware has been written around the Arduino Pro Micro Leonardo (5V/16Mhz). However, it is expected to work on any Arduino with a built in USB bootloader/Virtual Comport support with I2C support.
 
 1. Open `ArduinoProm.ino` in [Arduino IDE](https://www.arduino.cc/en/main/software)
@@ -17,12 +19,11 @@ The firmware has been written around the Arduino Pro Micro Leonardo (5V/16Mhz). 
   ![Arduino IDE preview](https://i.imgur.com/V7CJpkd.png)
 3. Hit the program button then confirm `ArduinoProm.ino` was compiled and written to the Arduino successfully.
 
-## Wiring
+### Wiring
 
 1. Connect `GND, SDA and SCL` on the Xbox LPC port to the corresponding pins on the Arduino module.
-![wiring](https://i.imgur.com/No7bvLF.png)
-
-![installed photo](https://i.imgur.com/fokwQjY.jpg)
+  ![wiring](https://i.imgur.com/No7bvLF.png)
+  ![installed photo](https://i.imgur.com/fokwQjY.jpg)
 
 ## ArduinoProm Functions
 
@@ -39,28 +40,31 @@ To facilitate these commands in a more user friendly way you can use the include
 
 `arduino_prom` is tested to run on [Python 3.13](https://www.python.org).
 
+### Installing `arduino_prom`
+
 Once Python3.13 is installed, install `arduino_prom` with the following shell commands:
 
 ```shell
-python -m pip install git://github.com/James-Yuichi-Sato/XboxEepromReadWrite/tree/master
+python -m pip install git+https://github.com/James-Yuichi-Sato/XboxEepromReadWrite/
 ```
 
-`ArduinoProm.py` usage is as follows (Determine your comport number by plugging in the Arduino to your PC after programming it)
+### `arduino_prom` Functions
+
+`arduino_prom` usage is as follows
+ (Determine your com port number by plugging in the Arduino to your PC after programming it)
 
 ```shell
 //Read the EEPROM on COM1 and save to file to eeprom.bin
-python ArduinoProm.py COM1 READ eeprom.bin
+python -m arduino_prom COM1 READ eeprom.bin
 
 //Write eeprom.bin to the EEPROM on COM1.
-python ArduinoProm.py COM1 WRITE eeprom.bin
+python -m arduino_prom COM1 WRITE eeprom.bin
 
 //Write all 0's to the EEPROM effectively erasing it.
-python ArduinoProm.py COM1 ERASE
+python -m arduino_prom COM1 ERASE
 ```
 
-Example outputs:  
-![Write](https://i.imgur.com/mRRVvAb.png)
-
-![Read](https://i.imgur.com/p308Va2.png)
-
-![Erase](https://i.imgur.com/r6GWkpm.png)
+Example outputs:
+  ![Write](https://i.imgur.com/mRRVvAb.png)
+  ![Read](https://i.imgur.com/p308Va2.png)
+  ![Erase](https://i.imgur.com/r6GWkpm.png)
