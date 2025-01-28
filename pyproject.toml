@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arduino_prom"
+version = "0.0.0a"
+description = "Minimal Python application to interface with ArduinoProm."
+authors = [
+    {name = "James Sato", email = "jamesysato@gmail.com"},
+]
+maintainers = [
+    {name = "James Sato", email = "jamesysato@gmail.com"},
+]
+readme = "README.md"
+requires-python = "~=3.13.0"
+dynamic = ["dependencies"]
+
+[project.scripts]
+arduino_prom = "arduino_prom.main:main"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages]
+find = {}
