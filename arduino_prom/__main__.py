@@ -1,37 +1,101 @@
 import argparse
-from .arduino_prom import eeprom_read, eeprom_write
+import logging
+from serial import Serial
+from .arduino_prom import eeprom_read, eeprom_write, eeprom_erase
+
 
 if __name__ == '__main__':
+    # Read Arguments from User
     parser = argparse.ArgumentParser()
 
-    # CSV Mode Arguments
+    # Logging
+    logging.basicConfig(level=logging.DEBUG)
+
+    # Default values for IDE/debug compiler simplicity
+    com, output_filepath, image_filepath = ""
+    read_bool, write_bool, erase_bool, ser = False
+
+    # COM Port
     parser.add_argument(
-        "-d", "--data-directory",
-        dest="data_dir",
+        "-C", "--COM-PORT",
+        dest="com",
         type=str,
+        required=True,
+        help="The COM Port of the Arduino to Serial connect to"
+    )
+
+    # Read Mode Argument
+    parser.add_argument(
+        "-r", "--read",
+        dest="read_bool",
+        action="store_true",
+        help="Read EEPROM using Arduino"
+    )
+
+    # Output File Location Argument
+    parser.add_argument(
+        "-o", "--output-filepath",
+        dest="output_filepath",
         default="",
-        help="The location of the parquet data files"
-    )
-
-    # Local Data Mode Arguments
-    parser.add_argument(
-        "-o", "--output-directory",
-        dest="out_dir",
         type=str,
-        default="./output_files/",
-        help="A flag to run model on local "
-        "DICOM data stored in /data/input directory"
+        help="EEPROM image output file location"
     )
 
+    # Write Mode Argument
     parser.add_argument(
-        "-n", "--max-thread-count",
-        dest="max_thread_count",
-        type=int,
-        default=24,
-        help="Number of Parallel Threads Desired"
+        "-w", "--write",
+        dest="write_bool",
+        action="store_true",
+        help="Write EEPROM using Arduino"
+    )
+
+    # File Location Argument
+    parser.add_argument(
+        "-f", "--image-filepath",
+        dest="image_filepath",
+        default="",
+        type=str,
+        help="EEPROM image file location"
+    )
+
+    # Erase Mode Argument
+    parser.add_argument(
+        "-e", "--erase",
+        dest="erase_bool",
+        action="store_true",
+        help="Erase EEPROM using Arduino"
     )
 
     args = vars(parser.parse_args())
+    locals().update(args)
 
-    print(args)
+    del args, parser
 
+    logging.info(locals())
+
+    try:
+        ser: Serial = Serial(
+            port=com,
+            baudrate=9600,
+            timeout=10,
+            rtscts=1
+        )
+    except Exception:
+        logging.critical("Could not open COM: %s", com)
+        raise
+
+    if read_bool:  # type: ignore
+        logging.info("Read Flag Received")
+        if not output_filepath:  # type: ignore
+            logging.critical("No output filepath received.")
+            raise ValueError("No output-filepath[-o] argument received")
+        eeprom_read(ser, output_filepath)
+    if write_bool:  # type: ignore
+        logging.info("Write Flag Received")
+        if not image_filepath:  # type: ignore
+            logging.critical("No image filepath received.")
+            raise ValueError("No image-filepath[-o] argument received")
+        eeprom_write(ser, image_filepath)
+    if erase_bool:  # type: ignore
+        logging.info("Erase Flag Received")
+        eeprom_erase(ser)

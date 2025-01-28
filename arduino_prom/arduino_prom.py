@@ -25,93 +25,87 @@ This program is free software: you can redistribute it and/or modify
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-
+from pathlib import Path
+import logging
 import time
 
 from serial import Serial
 
 
-def eeprom_read(ser: Serial):
+def eeprom_read(ser: Serial, out_filepath: str = ""):
+    if out_filepath:
+        logging.info("Creating output directory for: %s", out_filepath)
+        out_path = Path(out_filepath)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    logging.info("Reading EEPROM via: %s", ser.port)
     ser.flushInput()
     ser.flushOutput()
     rx_data = bytes()
     ser.write(bytearray(b'\x00'))
     rx_data = ser.read(256)
+    logging.info("EEPROM Read")
+    logging.info("Xbox Serial Number:", rx_data[0x34:0x40])
+
+    if len(rx_data) != 256:
+        raise ValueError("<255 bytes read from EEPROM. Check connections")
+
+    if out_filepath:
+        logging.info("Saving EEPROM file to: %s", out_filepath)
+        with open(out_path, 'wb') as eeprom_file:
+            eeprom_file.write(rx_data)
+        logging.info("EEPROM Saved, Job Complete")
+
     return rx_data
 
 
-def eeprom_write(ser: Serial, data):
+def eeprom_write(ser: Serial, input_filepath: str):
+    print("Opening EEPROM image at: %s", input_filepath)
+    with open(Path(input_filepath), 'rb') as eeprom_file:
+        eeprom_data = eeprom_file.read()
+
+    if len(eeprom_data) == 256:
+        logging.warning("This will rewrite the EEPROM ")
+        input("Ctrl+C to Cancel, Press Enter to write EEPROM...")
+        logging.info("Writing EEPROM file via: %s", ser.port)
+    else:
+        raise ValueError("Invalid EEPROM Data, Please Verify File")
+
     ser.flushInput()
     ser.flushOutput()
     ser.write(bytearray(b'\x01'))
-    ser.write(data)
+    ser.write(eeprom_data)
     ser.flushOutput()
     time.sleep(.1)
 
     if ser.read(1) == b'\x00':
-        print("Write successful")
-    return eeprom_read()
+        logging.info("Write successful")
 
-
-'''
-# Main function
-if len(sys.argv) > 1:
-    comport = sys.argv[1]
-    action = sys.argv[2]
-    try:
-        file = sys.argv[3]
-    except:
-        if action !="ERASE":
-            print("You need to specify a filename")
-
-
-try:
-    ser = serial.Serial(port=comport,
-                    baudrate=9600,
-                    timeout=10,
-                    rtscts=1)
-except:
-    print("Could not open",comport)
-    exit()
-
-if action == "READ":
-    print("Reading EEPROM via",comport)
-    eeprom_data = eeprom_read()
-    if len(eeprom_data) == 256:
-        print("Saving EEPROM file to", file)
-        eeprom_file = open(file, 'wb')
-        eeprom_file.write(eeprom_data)
-        # Print some basic info from EEPROM to give some confidence that it has been read ok.
-        print("Xbox Serial Number:",eeprom_data[0x34:0x40])
+    logging.info("Verifying EEPROM Data")
+    result = eeprom_read(ser)
+    if eeprom_data == result:
+        logging.info("Verification Successful")
     else:
-        print("Error Reading EEPROM. Check connections");
+        logging.critical("Error writing EEPROM")
+        raise ValueError("EEPROM write corruption, "
+                         "Check Connections and Rerun Write")
 
-if action == "WRITE":
-    print("Opening EEPROM",file)
-    eeprom_file = open(file, 'rb')
-    eeprom_data = eeprom_file.read();
-    if len(eeprom_data) == 256:
-        print("WARNING: This will rewrite the EEPROM ")
-        input("Press Enter to write EEPROM...")
-        print("Writing EEPROM file via", comport);
-        result = eeprom_write(eeprom_data)
-        print("Verifying...")
-        if eeprom_data == result:
-            print("Verification Successful")
-        else:
-            print("Error writing EEPROM")
-    else:
-        print("Error Reading EEPROM file. Check it's not corrupt and the filename is ok");
 
-if action == "ERASE":
-    print("WARNING: This will erase the EEPROM ")
-    input("Press Enter to erase EEPROM...")
+def eeprom_erase(ser: Serial):
+    logging.warning("This will erase the EEPROM!")
+    input("Ctrl+C to Cancel, Press Enter to erase EEPROM...")
+    logging.warning("Are you sure? This will erase the EEPROM!")
+    input("Ctrl+C to Cancel, Press Enter to erase EEPROM...")
+    logging.info("Erasing EEPROM, waiting 5 seconds"
+                 " before starting job as safeguard")
+    time.sleep(5)
+    logging.warning("Erasing EEPROM")
     ser.write(bytearray(b'\x02'))
     ser.flushOutput()
+    logging.info("EEPROM Erase command sent, verifying erase")
     time.sleep(.1)
 
     if ser.read(1) == b'\x00':
-        print("Erase successful.")
+        logging.info("Erase successful.")
     else:
-        print("Error erasing device. Check connections")
-'''
+        logging.info("Error erasing device. Check connections")
