@@ -12,8 +12,8 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     # Default values for IDE/debug compiler simplicity
-    com, output_filepath, image_filepath = ""
-    read_bool, write_bool, erase_bool, ser = False
+    com, output_filepath, image_filepath = "", "", ""
+    read_bool, write_bool, erase_bool, ser = False, False, False, False
 
     # COM Port
     parser.add_argument(
