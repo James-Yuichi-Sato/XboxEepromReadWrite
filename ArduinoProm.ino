@@ -52,8 +52,16 @@ void loop() {
     switch (incomingCommand) {
       case EEPROM_READ:
         returnStatus = XboxI2C_ReadEEPROM(XBOX_EEPROM_ADDRESS, pbEEPROM);
+        if (returnStatus = -1)
+        {
+          returnStatus = 1
+        }
+        else
+        {
+          returnStatus = 0
+        }
         if (returnStatus != -1) {
-          returnStatus = Serial.write(pbEEPROM, XBOX_EEPROM_SIZE);
+          returnStatus += Serial.write(pbEEPROM, XBOX_EEPROM_SIZE);
         }
         break;
 

@@ -43,8 +43,11 @@ def eeprom_read(ser: Serial, out_filepath: str = ""):
     ser.flushOutput()
     rx_data = bytes()
     ser.write(bytearray(b'\x00'))
+    check_value = ser.read(1)
     rx_data = ser.read(256)
     logging.info("EEPROM Read")
+    if check_value == 1:
+        raise ValueError("No value returned from Arduiono")
     logging.info(f"Bytes read: {len(rx_data)}")
     try:
         logging.info(f"Xbox Serial Number: {str(rx_data[0x34:0x40])}")
