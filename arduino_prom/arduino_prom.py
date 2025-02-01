@@ -45,6 +45,7 @@ def eeprom_read(ser: Serial, out_filepath: str = ""):
     ser.write(bytearray(b'\x00'))
     rx_data = ser.read(256)
     logging.info("EEPROM Read")
+    logging.info(f"Bytes read: {len(rx_data)}")
     try:
         logging.info(f"Xbox Serial Number: {str(rx_data[0x34:0x40])}")
     except Exception:
