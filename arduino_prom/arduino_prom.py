@@ -64,7 +64,7 @@ def eeprom_read(ser: Serial, out_filepath: str = ""):
 
 
 def eeprom_write(ser: Serial, input_filepath: str):
-    print("Opening EEPROM image at: %s", input_filepath)
+    logging.info("Opening EEPROM image at: %s", input_filepath)
     with open(Path(input_filepath), 'rb') as eeprom_file:
         eeprom_data = eeprom_file.read()
 
@@ -75,12 +75,18 @@ def eeprom_write(ser: Serial, input_filepath: str):
     else:
         raise ValueError("Invalid EEPROM Data, Please Verify File")
 
+    logging.info("Flushing Serial Input")
     ser.flushInput()
+    logging.info("Flushing Serial Output")
     ser.flushOutput()
+    logging.info("Writing to EEPROM x01 to Begin Write")
     ser.write(bytearray(b'\x01'))
+    logging.info("Writing EEPROM")
     ser.write(eeprom_data)
+    logging.info("Write Complete, Flushing output")
     ser.flushOutput()
     time.sleep(.1)
+    logging.info('Steps Completed')
 
     if ser.read(1) == b'\x00':
         logging.info("Write successful")
