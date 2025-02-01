@@ -46,7 +46,7 @@ def eeprom_read(ser: Serial, out_filepath: str = ""):
     rx_data = ser.read(256)
     logging.info("EEPROM Read")
     try:
-        logging.info(f"Xbox Serial Number: {rx_data[0x34:0x40]}")
+        logging.info(f"Xbox Serial Number: {str(rx_data[0x34:0x40])}")
     except Exception:
         logging.error("No data at rx_data[0x34:0x40]")
 
