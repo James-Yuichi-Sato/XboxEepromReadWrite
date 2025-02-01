@@ -51,7 +51,7 @@ def eeprom_read(ser: Serial, out_filepath: str = ""):
         logging.error("No data at rx_data[0x34:0x40]")
 
     if len(rx_data) != 256:
-        raise ValueError("<255 bytes read from EEPROM. Check connections")
+        logging.error("<255 bytes read from EEPROM. Check connections")
 
     if out_filepath:
         logging.info("Saving EEPROM file to: %s", out_filepath)
